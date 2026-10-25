@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://b5mrmlabiumcp"]
+
+[ext_resource type="Script" uid="uid://d06dar2xoy5yq" path="res://scripts/game.gd" id="1_lnu2h"]
+[ext_resource type="PackedScene" uid="uid://cjusarskcjt6u" path="res://scenes/player.tscn" id="1_uwrxv"]
+[ext_resource type="PackedScene" uid="uid://bpieyrjw4bbrl" path="res://scenes/zombies/zombie_fast.tscn" id="4_lbhrr"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_0qjmo"]
+size = Vector3(3.123291, 1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vco5m"]
+size = Vector3(3.1408691, 1, 1)
+
+[sub_resource type="MeshTexture" id="MeshTexture_dyxgh"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_icch2"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_dyxgh"]
+
+[node name="Game" type="Node3D" unique_id=654491437]
+script = ExtResource("1_lnu2h")
+
+[node name="Player" parent="." unique_id=1839280870 instance=ExtResource("1_uwrxv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.07425594, 2.0875173, 3.6938019)
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1565580960]
+transform = Transform3D(1, 0, 0, 0, 0.34202015, 0.9396926, 0, -0.9396926, 0.34202015, -0.14714766, 19.234484, 11.174393)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=717498180]
+transform = Transform3D(1, 0, 0, 0, 0.34202015, 0.9396926, 0, -0.9396926, 0.34202015, 0, 23.6335, 14.255051)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=602900830]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -1.4508321, 1.0790691, 0)
+mesh = SubResource("BoxMesh_0qjmo")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D2" unique_id=1175795546]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D2/StaticBody3D" unique_id=1203348497]
+shape = SubResource("BoxShape3D_vco5m")
+
+[node name="Sprite3D" type="Sprite3D" parent="MeshInstance3D2" unique_id=2014035337]
+modulate = Color(0.15294118, 0.54509807, 0.3529412, 1)
+texture = SubResource("MeshTexture_dyxgh")
+
+[node name="Timer" type="Timer" parent="." unique_id=1048277567]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1155198284]
+transform = Transform3D(30, 0, 0, 0, 1, 0, 0, 0, 30, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1746704031]
+shape = SubResource("BoxShape3D_icch2")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=933656809]
+mesh = SubResource("BoxMesh_dyxgh")
+
+[node name="ZombieFast" parent="." unique_id=564765441 instance=ExtResource("4_lbhrr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.019499, 1, -2.217805)

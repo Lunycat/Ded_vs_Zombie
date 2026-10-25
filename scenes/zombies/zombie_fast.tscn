@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://bpieyrjw4bbrl"]
+
+[ext_resource type="Script" uid="uid://tlrgqmduqglh" path="res://scripts/zombies/zombie_fast.gd" id="1_voysl"]
+
+[sub_resource type="PrismMesh" id="PrismMesh_dyxgh"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_icch2"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dyxgh"]
+size = Vector3(1.0087891, 1, 1.0742188)
+
+[node name="ZombieFast" type="CharacterBody3D" unique_id=564765441]
+script = ExtResource("1_voysl")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1558124359]
+mesh = SubResource("PrismMesh_dyxgh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1515770326]
+shape = SubResource("BoxShape3D_icch2")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=369269194]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=419113675]
+shape = SubResource("BoxShape3D_dyxgh")
