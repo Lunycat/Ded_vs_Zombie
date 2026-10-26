@@ -7,7 +7,7 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_g2els"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_dyxgh"]
-size = Vector3(1.0439453, 1, 1.0527344)
+size = Vector3(1.1035156, 1, 1.1149902)
 
 [node name="Zombie" type="CharacterBody3D" unique_id=1842117996]
 platform_floor_layers = 4294967042
@@ -27,4 +27,9 @@ collision_layer = 2
 shape = SubResource("BoxShape3D_dyxgh")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=2062045501]
+avoidance_enabled = true
+radius = 0.7
+neighbor_distance = 10.0
+max_neighbors = 8
+max_speed = 3.0
 debug_enabled = true

@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="InvalidVsZombie"
+config/name="DedVsZombie"
 run/main_scene="uid://b5mrmlabiumcp"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
@@ -22,7 +22,7 @@ window/stretch/aspect="expand"
 
 [dotnet]
 
-project/assembly_name="InvalidVsZombie"
+project/assembly_name="DedVsZombie"
 
 [layer_names]
 
