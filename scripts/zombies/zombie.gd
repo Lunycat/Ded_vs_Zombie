@@ -8,6 +8,8 @@ class_name Zombie
 @export var knockback_force: float = 5.0 # Скорость отталкивания
 @export var toss: float = 5.0 # Высота подброса
 
+@onready var _navigation: NavigationAgent3D = $NavigationAgent3D
+
 var _player: CharacterBody3D = null
 var _attack_timer: float = 0.0
 var _player_in_range: bool = false
@@ -28,17 +30,30 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 	
 	_attack_timer -= delta
-	var to_player: Vector3 = _player.global_position - global_position
-	to_player.y = 0 # чтоб зонбе не взлетал
+	
+	if not is_instance_valid(_player):
+		_player_in_range = false
+		velocity.x = 0
+		velocity.z = 0
+		move_and_slide()
+		return
 	
 	if _player_in_range:
 		velocity.x = 0
 		velocity.z = 0
 		_attack()
 	else:
-		var directory: Vector3 = to_player.normalized()
-		velocity.x = directory.x * move_speed
-		velocity.z = directory.z * move_speed
+		if (_navigation.target_position - _player.position).length() > 1:
+			_navigation.set_target_position(_player.global_position)
+		
+		var destination: Vector3 = _navigation.get_next_path_position()
+		var local_destination: Vector3 = destination - global_position
+		local_destination.y = 0
+		
+		if local_destination.length_squared() > 0.0001:
+			var direction: Vector3 = local_destination.normalized()
+			velocity.x = direction.x * move_speed
+			velocity.z = direction.z * move_speed
 	
 	move_and_slide()
 
@@ -51,8 +66,8 @@ func _attack() -> void:
 
 func _perform_attack():
 	_player.take_damage(damage)
-	var directory: Vector3 = _player.global_position - global_position
-	_player.apply_knockback(directory, knockback_force, toss)
+	var direction: Vector3 = _player.global_position - global_position
+	_player.apply_knockback(direction, knockback_force, toss)
 
 func take_damage(amount: int) -> void:
 	health -= amount
