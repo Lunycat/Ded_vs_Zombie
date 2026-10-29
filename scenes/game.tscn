@@ -67,7 +67,6 @@ material = SubResource("StandardMaterial3D_icch2")
 [node name="SpawnManager" parent="." unique_id=157596160 instance=ExtResource("1_lnu2h")]
 min_radius = 12.0
 max_radius = 12.0
-max_zombies = 10
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1565580960]
 transform = Transform3D(1, 0, 0, 0, 0.34202015, 0.9396926, 0, -0.9396926, 0.34202015, -0.14714766, 19.234484, 11.174393)

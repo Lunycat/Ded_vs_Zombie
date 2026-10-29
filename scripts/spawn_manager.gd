@@ -7,16 +7,18 @@ extends Node3D
 @onready var _timer: Timer = $Timer
 
 const ZOMBIE_SCENE: Resource = preload("res://scenes/zombies/zombie.tscn")
-var _player: CharacterBody3D = null
 const GOLDEN_ANGLE: float = PI * (3.0 - sqrt(5.0))
+var _player: CharacterBody3D = null
+var _camera: Camera3D = null
 var _angle: float = 0
-var _spawn_count = 0
-var _alive_zombie = 0
+var _spawn_count: int = 0
+var _alive_zombie: int = 0
 var _R: float = 0
 var _navigation_map: RID
 
 func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player")
+	_camera = get_viewport().get_camera_3d()
 	_timer.timeout.connect(_on_timeout)
 	_navigation_map = get_world_3d().navigation_map
 
@@ -34,7 +36,8 @@ func _on_timeout() -> void:
 		var vector_valid: Vector3 = NavigationServer3D.map_get_closest_point(
 			_navigation_map, vector_of_spawn
 		)
-		if vector_of_spawn.distance_to(vector_valid) < 0.6:
+		var distance: float = vector_of_spawn.distance_to(vector_valid)
+		if distance < 0.6 and not _camera.is_position_in_frustum(vector_valid):
 			_spawn_zombies(vector_valid)
 
 func _spawn_zombies(vector: Vector3) -> void:
