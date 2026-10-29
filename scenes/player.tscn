@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cjusarskcjt6u"]
 
 [ext_resource type="Script" uid="uid://dt34o5gydnjtg" path="res://scripts/player.gd" id="1_3vyb7"]
+[ext_resource type="PackedScene" uid="uid://3v46tscym4do" path="res://scenes/guns/gun_default.tscn" id="2_g2els"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dyxgh"]
 
@@ -11,8 +12,15 @@ collision_layer = 2
 collision_mask = 7
 script = ExtResource("1_3vyb7")
 
+[node name="GunDefault" parent="." unique_id=1808121232 instance=ExtResource("2_g2els")]
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=119337652]
 shape = SubResource("CapsuleShape3D_dyxgh")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1228934968]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1571098144]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 1)
+
+[node name="VisualPivot" type="Node3D" parent="." unique_id=532866155]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VisualPivot" unique_id=1228934968]
 mesh = SubResource("CapsuleMesh_dyxgh")
