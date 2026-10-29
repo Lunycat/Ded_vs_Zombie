@@ -1,5 +1,7 @@
 extends CharacterBody3D
 
+enum State {NORMAL, KNOCKBACK}
+
 @export var max_distance_mouse: float = 50.0
 @export var SPEED: float = 6.0
 @export var JUMP_VELOCITY: float = 4.5
@@ -12,6 +14,7 @@ extends CharacterBody3D
 var _camera: Camera3D = null
 var _health: int = 0;
 var _knockback_velocity: Vector3 = Vector3.ZERO
+var _current_state = State.NORMAL
 
 func _ready() -> void:
 	add_to_group("player")
@@ -23,9 +26,23 @@ func _physics_process(delta: float) -> void:
 	_move_mouse()
 	
 	if not is_on_floor():
-		velocity += get_gravity() * delta
+		_use_gravity(delta)
 
+	_change_state()
+	_action_depending_on_state(delta)
+	move_and_slide()
+
+func _use_gravity(delta: float) -> void:
+	velocity += get_gravity() * delta
+
+func _change_state() -> void:
 	if _knockback_velocity.length() > 0.0001:
+		_current_state = State.KNOCKBACK
+	else:
+		_current_state = State.NORMAL
+
+func _action_depending_on_state(delta: float) -> void:
+	if _current_state == State.KNOCKBACK:
 		velocity.x = _knockback_velocity.x
 		velocity.z = _knockback_velocity.z
 		
@@ -33,11 +50,8 @@ func _physics_process(delta: float) -> void:
 		_knockback_velocity = _knockback_velocity.move_toward(
 			Vector3.ZERO, knockback_friction * friction_mul * delta
 		)
-	else:
+	elif _current_state == State.NORMAL:
 		_knockback_velocity = Vector3.ZERO
-		if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-			velocity.y = JUMP_VELOCITY
-
 		var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		# Компенсация сжатия по Z: камера наклонена, поэтому 1 м в мире по Z
 		# на экране выглядит короче. Делим input_dir.y на sin(угол подъёма камеры),
@@ -46,19 +60,12 @@ func _physics_process(delta: float) -> void:
 		sin_phi = maxf(sin_phi, 0.01)  # защита от деления на 0, если камера горизонтальна
 		var direction: Vector3 = Vector3(input_dir.x, 0, input_dir.y / sin_phi)
 		
-		if is_on_floor():
-			if direction:
-				velocity.x = direction.x * SPEED
-				velocity.z = direction.z * SPEED
-			else:
-				velocity.x = move_toward(velocity.x, 0, SPEED * 10.0 * delta)
-				velocity.z = move_toward(velocity.z, 0, SPEED * 10.0 * delta)
+		if direction:
+			velocity.x = direction.x * SPEED
+			velocity.z = direction.z * SPEED
 		else:
-			if direction:
-				velocity.x = move_toward(velocity.x, direction.x * SPEED, SPEED * 2.0 * delta)
-				velocity.z = move_toward(velocity.z, direction.z * SPEED, SPEED * 2.0 * delta)
-
-	move_and_slide()
+			velocity.x = move_toward(velocity.x, 0, SPEED * 10.0 * delta)
+			velocity.z = move_toward(velocity.z, 0, SPEED * 10.0 * delta)
 
 func take_damage(damage: int) -> void:
 	_health -= damage
@@ -80,12 +87,14 @@ func _move_mouse() -> void:
 	if target == Vector3.INF:
 		return
 	
+	# Расстояние от персонажа до метки на экране
 	var to_target: Vector3 = target - _visual_pivot.global_position
 	to_target.y = 0
 
 	if to_target.length_squared() < 0.01:
 		return
-
+	
+	# Насколько градусов нужно повернуться по вертикальной оси
 	_visual_pivot.rotation.y = atan2(-to_target.x, -to_target.z)
 
 func _get_ground_position(ray_origin: Vector3, ray_end: Vector3) -> Vector3:
@@ -102,6 +111,9 @@ func _get_ground_position(ray_origin: Vector3, ray_end: Vector3) -> Vector3:
 		return result.position
 	
 	return Vector3.INF
+
+func _attack() -> void:
+	pass
 
 func _die() -> void:
 	queue_free()

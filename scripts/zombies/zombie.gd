@@ -1,6 +1,8 @@
 extends CharacterBody3D
 class_name Zombie
 
+enum State {IDLE, PURSUIT, ATTACK}
+
 @export var health: int = 100
 @export var move_speed: float = 3.0
 @export var damage: int = 30
@@ -11,12 +13,10 @@ class_name Zombie
 
 @onready var _navigation: NavigationAgent3D = $NavigationAgent3D
 
-enum State {IDLE, PURSUIT, ATTACK}
-
 var _player: CharacterBody3D = null
 var _attack_timer: float = 0.0
 var _player_in_range: bool = false
-var current_state: State = State.IDLE
+var _current_state: State = State.IDLE
 
 func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player")
@@ -35,37 +35,37 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 	
 	_attack_timer -= delta
-	
-	# Ставим статус
+	_change_state()
+	_action_depending_on_state(delta)
+
+func _change_state() -> void:
 	if not is_instance_valid(_player):
-		current_state = State.IDLE
+		_current_state = State.IDLE
 		_player_in_range = false
 	elif _player_in_range:
-		current_state = State.ATTACK
+		_current_state = State.ATTACK
 	else:
-		current_state = State.PURSUIT
-	
-	# Действие в зависимости от статуса
-	if current_state == State.IDLE:
+		_current_state = State.PURSUIT
+
+func _action_depending_on_state(delta: float) -> void:
+	if _current_state == State.IDLE:
 		_navigation.velocity = Vector3.ZERO
 		velocity.x = move_toward(velocity.x, 0, move_speed * slow_move * delta)
 		velocity.z = move_toward(velocity.z, 0, move_speed * slow_move * delta)
 		move_and_slide()
-		return
-	elif current_state == State.ATTACK:
+	elif _current_state == State.ATTACK:
 		_navigation.velocity = Vector3.ZERO
 		_navigation.avoidance_enabled = false
 		velocity.x = 0
 		velocity.z = 0
 		_attack()
 		move_and_slide()
-	elif current_state == State.PURSUIT:
+	elif _current_state == State.PURSUIT:
 		_navigation.avoidance_enabled = true
 		_pursuit_state()
-	
 
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
-	if current_state == State.ATTACK:
+	if _current_state == State.ATTACK:
 		return
 	velocity = safe_velocity
 	move_and_slide()

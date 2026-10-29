@@ -9,3 +9,6 @@ height = 0.8701172
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=2120900263]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0.4, -0.904)
 mesh = SubResource("CapsuleMesh_vnbya")
+
+[node name="Marker3D" type="Marker3D" parent="." unique_id=121573504]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -1.3061821)

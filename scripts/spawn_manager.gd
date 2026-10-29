@@ -29,7 +29,6 @@ func _on_timeout() -> void:
 		var R: float = randf_range(min_radius, max_radius)
 		var x: float = _player.global_position.x + R * cos(angle)
 		var z: float = _player.global_position.z + R * sin(angle)
-		# var y: float = _get_ground_y(x, z)
 		var vector_of_spawn: Vector3 = Vector3(x, 0, z)
 		var vector_valid: Vector3 = NavigationServer3D.map_get_closest_point(
 			_navigation_map, vector_of_spawn
@@ -46,21 +45,6 @@ func _spawn_zombies(vector: Vector3) -> void:
 	add_child(zombie)
 	zombie.global_position = vector
 	_alive_zombie += 1
-
-func _get_ground_y(x: float, z: float) -> float:
-	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
-	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
-		Vector3(x, 100, z),
-		Vector3(x, -100, z),
-		1,
-		[self]
-	)
-	var result: Dictionary = space_state.intersect_ray(query)
-	
-	if result:
-		return result.position.y
-	
-	return 0.0
 
 func _decrement_alive_zombie():
 	_alive_zombie -= 1

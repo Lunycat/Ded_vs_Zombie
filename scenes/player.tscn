@@ -10,17 +10,19 @@
 [node name="Player" type="CharacterBody3D" unique_id=1839280870]
 collision_layer = 2
 collision_mask = 7
+platform_floor_layers = 4294967042
+platform_wall_layers = 7
 script = ExtResource("1_3vyb7")
-
-[node name="GunDefault" parent="." unique_id=1808121232 instance=ExtResource("2_g2els")]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=119337652]
-shape = SubResource("CapsuleShape3D_dyxgh")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1571098144]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=119337652]
+shape = SubResource("CapsuleShape3D_dyxgh")
 
 [node name="VisualPivot" type="Node3D" parent="." unique_id=532866155]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="VisualPivot" unique_id=1228934968]
 mesh = SubResource("CapsuleMesh_dyxgh")
+
+[node name="GunDefault" parent="VisualPivot" unique_id=1808121232 instance=ExtResource("2_g2els")]
