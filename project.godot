@@ -26,8 +26,11 @@ project/assembly_name="DedVsZombie"
 
 [layer_names]
 
-3d_physics/layer_1="Player"
-3d_physics/layer_2="Zombie"
+3d_render/layer_4="building"
+3d_physics/layer_1="ground"
+3d_physics/layer_2="player"
+3d_physics/layer_3="zombie"
+3d_physics/layer_4="builders"
 
 [physics]
 

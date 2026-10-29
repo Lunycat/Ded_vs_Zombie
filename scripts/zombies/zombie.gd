@@ -29,7 +29,6 @@ func _ready() -> void:
 			_player_in_range = false
 	)
 	_navigation.velocity_computed.connect(_on_velocity_computed)
-	_navigation.avoidance_priority = randf_range(0.4, 1)
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():

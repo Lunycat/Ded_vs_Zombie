@@ -4,3 +4,8 @@
 
 [node name="SpawnManager" type="Node3D" unique_id=157596160]
 script = ExtResource("1_ltx4y")
+min_radius = 1.0
+max_radius = 2.0
+
+[node name="Timer" type="Timer" parent="." unique_id=362960686]
+autostart = true
