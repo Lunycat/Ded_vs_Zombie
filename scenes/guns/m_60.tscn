@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://cx10n1su2bbng"]
+
+[ext_resource type="PackedScene" uid="uid://dg2yjvti4av0k" path="res://models/guns/M60_model.glb" id="1_cwlst"]
+[ext_resource type="Script" uid="uid://kv1hfcmy0q3d" path="res://scripts/guns/m_60.gd" id="1_hqmv5"]
+
+[node name="M60" type="Node3D" unique_id=920386548]
+script = ExtResource("1_hqmv5")
+
+[node name="M60_model" parent="." unique_id=1471252290 instance=ExtResource("1_cwlst")]
+
+[node name="Marker3D" type="Marker3D" parent="." unique_id=665428830]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5440544, 0.021462083, 0)

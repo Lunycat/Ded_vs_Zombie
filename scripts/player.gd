@@ -3,8 +3,6 @@ extends CharacterBody3D
 enum State {NORMAL, KNOCKBACK}
 
 @export var max_distance_mouse: float = 50.0
-@export var max_distance_attack: float = 100.0
-@export var attack_coldown: float = 0.6
 @export var SPEED: float = 6.0
 @export var JUMP_VELOCITY: float = 4.5
 @export var max_health: int = 100
@@ -105,7 +103,7 @@ func _move_activity(delta: float) -> void:
 	
 	if Input.is_action_pressed("attack") and _attack_timer <= 0.0:
 		_attack(target)
-		_attack_timer = attack_coldown
+		_attack_timer = _gun.shot_coldown
 	
 	# Расстояние от персонажа до метки на экране
 	var to_target: Vector3 = target - _visual_pivot.global_position
@@ -122,7 +120,7 @@ func _get_ground_position(ray_origin: Vector3, ray_end: Vector3) -> Vector3:
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		ray_origin,
 		ray_end,
-		1 | 3,
+		5,
 		[self]
 	)
 	var result: Dictionary = space_state.intersect_ray(query)
@@ -135,7 +133,7 @@ func _get_ground_position(ray_origin: Vector3, ray_end: Vector3) -> Vector3:
 func _attack(target: Vector3) -> void:
 	var muzzle: Vector3 = _gun.get_node("Muzzle").global_position
 	var direction: Vector3 = (target - muzzle).normalized()
-	var end_position: Vector3 = muzzle + direction * max_distance_attack
+	var end_position: Vector3 = muzzle + direction * _gun.max_distance_attack
 	
 	var space_state := get_world_3d().direct_space_state
 	var query := PhysicsRayQueryParameters3D.create(muzzle, end_position, 13, [self])
