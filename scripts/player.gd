@@ -3,18 +3,22 @@ extends CharacterBody3D
 enum State {NORMAL, KNOCKBACK}
 
 @export var max_distance_mouse: float = 50.0
+@export var max_distance_attack: float = 100.0
+@export var attack_coldown: float = 0.6
 @export var SPEED: float = 6.0
 @export var JUMP_VELOCITY: float = 4.5
 @export var max_health: int = 100
-@export var knockback_friction: float = 13.0 # Скорость гасания отталкивания
+# Скорость гасания отталкивания
+@export var knockback_friction: float = 13.0
 
 @onready var _visual_pivot: Node3D = $VisualPivot
-@onready var _gun: Node3D = $GunDefault
+@onready var _gun: Gun = $VisualPivot/Gun
 
 var _camera: Camera3D = null
 var _health: int = 0;
 var _knockback_velocity: Vector3 = Vector3.ZERO
-var _current_state = State.NORMAL
+var _current_state: State = State.NORMAL
+var _attack_timer: float = 0.0
 
 func _ready() -> void:
 	add_to_group("player")
@@ -23,7 +27,8 @@ func _ready() -> void:
 	_camera.call_deferred("look_at", self.global_position + Vector3(0, 1, 0))
 
 func _physics_process(delta: float) -> void:
-	_move_mouse()
+	_attack_timer -= delta
+	_move_mouse(delta)
 	
 	if not is_on_floor():
 		_use_gravity(delta)
@@ -77,7 +82,7 @@ func apply_knockback(direction: Vector3, force: float, toss: float) -> void:
 	_knockback_velocity = direction.normalized() * force
 	velocity.y = toss
 
-func _move_mouse() -> void:
+func _move_mouse(delta: float) -> void:
 	var mouse_position: Vector2 = get_viewport().get_mouse_position()
 	var ray_origin: Vector3 = _camera.project_ray_origin(mouse_position)
 	var ray_normal: Vector3 = _camera.project_ray_normal(mouse_position)
@@ -86,6 +91,10 @@ func _move_mouse() -> void:
 	
 	if target == Vector3.INF:
 		return
+	
+	if Input.is_action_pressed("attack") and _attack_timer <= 0.0:
+		_attack(target)
+		_attack_timer = attack_coldown
 	
 	# Расстояние от персонажа до метки на экране
 	var to_target: Vector3 = target - _visual_pivot.global_position
@@ -105,15 +114,32 @@ func _get_ground_position(ray_origin: Vector3, ray_end: Vector3) -> Vector3:
 		1,
 		[self]
 	)
-	var result = space_state.intersect_ray(query)
+	var result: Dictionary = space_state.intersect_ray(query)
 	
 	if result:
 		return result.position
 	
 	return Vector3.INF
 
-func _attack() -> void:
-	pass
+func _attack(target: Vector3) -> void:
+	var collision = _get_attack_collision(target)
+	if collision is Zombie:
+		collision.take_damage(_gun.damage)
+
+func _get_attack_collision(target: Vector3) -> Object:
+	var muzzle: Vector3 = _gun.get_node("Muzzle").global_position
+	var direction: Vector3 = (target - muzzle)
+	direction = direction.normalized()
+	var end_position: Vector3 = muzzle + direction * max_distance_attack
+	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+		muzzle,
+		end_position,
+		5,
+		[self]
+	)
+	var result: Dictionary = space_state.intersect_ray(query)
+	return result.get("collider")
 
 func _die() -> void:
 	queue_free()
