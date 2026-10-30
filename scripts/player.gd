@@ -19,16 +19,18 @@ var _health: int = 0;
 var _knockback_velocity: Vector3 = Vector3.ZERO
 var _current_state: State = State.NORMAL
 var _attack_timer: float = 0.0
+var _tracer_material: StandardMaterial3D = null
 
 func _ready() -> void:
 	add_to_group("player")
 	_health = max_health
 	_camera = get_viewport().get_camera_3d()
 	_camera.call_deferred("look_at", self.global_position + Vector3(0, 1, 0))
+	_init_tracer_material()
 
 func _physics_process(delta: float) -> void:
 	_attack_timer -= delta
-	_move_mouse(delta)
+	_move_activity(delta)
 	
 	if not is_on_floor():
 		_use_gravity(delta)
@@ -36,6 +38,15 @@ func _physics_process(delta: float) -> void:
 	_change_state()
 	_action_depending_on_state(delta)
 	move_and_slide()
+
+func _init_tracer_material() -> void:
+	_tracer_material = StandardMaterial3D.new()
+	_tracer_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_tracer_material.albedo_color = Color(1.0, 0.024, 0.18, 1.0)
+	_tracer_material.emission_enabled = true
+	_tracer_material.emission = Color(1.0, 0.024, 0.18, 1.0)
+	_tracer_material.emission_energy_multiplier = 2.0
+	_tracer_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 
 func _use_gravity(delta: float) -> void:
 	velocity += get_gravity() * delta
@@ -82,7 +93,7 @@ func apply_knockback(direction: Vector3, force: float, toss: float) -> void:
 	_knockback_velocity = direction.normalized() * force
 	velocity.y = toss
 
-func _move_mouse(delta: float) -> void:
+func _move_activity(delta: float) -> void:
 	var mouse_position: Vector2 = get_viewport().get_mouse_position()
 	var ray_origin: Vector3 = _camera.project_ray_origin(mouse_position)
 	var ray_normal: Vector3 = _camera.project_ray_normal(mouse_position)
@@ -111,7 +122,7 @@ func _get_ground_position(ray_origin: Vector3, ray_end: Vector3) -> Vector3:
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
 		ray_origin,
 		ray_end,
-		1,
+		1 | 3,
 		[self]
 	)
 	var result: Dictionary = space_state.intersect_ray(query)
@@ -122,24 +133,42 @@ func _get_ground_position(ray_origin: Vector3, ray_end: Vector3) -> Vector3:
 	return Vector3.INF
 
 func _attack(target: Vector3) -> void:
-	var collision = _get_attack_collision(target)
-	if collision is Zombie:
-		collision.take_damage(_gun.damage)
-
-func _get_attack_collision(target: Vector3) -> Object:
 	var muzzle: Vector3 = _gun.get_node("Muzzle").global_position
-	var direction: Vector3 = (target - muzzle)
-	direction = direction.normalized()
+	var direction: Vector3 = (target - muzzle).normalized()
 	var end_position: Vector3 = muzzle + direction * max_distance_attack
-	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
-	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
-		muzzle,
-		end_position,
-		5,
-		[self]
-	)
-	var result: Dictionary = space_state.intersect_ray(query)
-	return result.get("collider")
+	
+	var space_state := get_world_3d().direct_space_state
+	var query := PhysicsRayQueryParameters3D.create(muzzle, end_position, 13, [self])
+	var hit: Dictionary = space_state.intersect_ray(query)
+	
+	if not hit.is_empty():
+		var collider = hit.collider
+		if collider and collider.has_method("take_damage"):
+			collider.take_damage(_gun.damage)
+		_spawn_tracer(muzzle, hit.position)
+	else:
+		_spawn_tracer(muzzle, end_position)
+
+func _spawn_tracer(from: Vector3, to: Vector3) -> void:
+	var distance: float = from.distance_to(to)
+	if distance < 0.01:
+		return
+	
+	var tracer: MeshInstance3D = MeshInstance3D.new()
+	var mesh = BoxMesh.new()
+	mesh.size = Vector3(0.1, 0.1, distance)
+	tracer.mesh = mesh
+	tracer.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	tracer.material_override = _tracer_material.duplicate()
+	
+	get_tree().current_scene.add_child(tracer)
+	tracer.global_position = (from + to) * 0.5
+	tracer.look_at(to, Vector3.UP)
+	
+	var mat: StandardMaterial3D = tracer.material_override as StandardMaterial3D
+	var tween: Tween = tracer.create_tween()
+	tween.tween_property(mat, "albedo_color:a", 0.0, 0.08)
+	tween.tween_callback(tracer.queue_free)
 
 func _die() -> void:
 	queue_free()
